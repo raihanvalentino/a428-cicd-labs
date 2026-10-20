@@ -8,19 +8,32 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                echo 'Building React App...'
                 sh 'npm install'
             }
         }
         stage('Test') {
             steps {
+                echo 'Testing React App...'
                 sh './jenkins/scripts/test.sh'
             }
         }
-        stage('Deploy') { 
+        // KRITERIA 4: Tambahkan Stage Manual Approval sebelum Deploy
+        stage('Manual Approval') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
-                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
-                sh './jenkins/scripts/kill.sh' 
+                input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+            }
+        }
+        // KRITERIA 2: Deploy Stage
+        stage('Deploy') {
+            steps {
+                sh './jenkins/scripts/deliver.sh'
+                
+                // KRITERIA 3: Jeda eksekusi otomatis selama 1 menit (60 detik)
+                echo 'Aplikasi berhasil di-deploy. Menunggu 1 menit...'
+                sleep 60
+                
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
